@@ -20,6 +20,7 @@ tamGuiX= 0.150
 #Slider sradio,sm,sn1,sn2,sn3
 
 def setup():
+    print "Comienza"
     fullScreen()
     h = int(height * .03)
     w = int(width * tamGuiX)
@@ -65,23 +66,23 @@ def setup():
     cp5.addButton("ejemplo 4",1).setPosition(10,sep*13).setSize(w,h)
     cp5.addButton("ejemplo 5",1).setPosition(10,sep*14).setSize(w,h)
     cp5.addButton("ejemplo 6",1).setPosition(10,sep*15).setSize(w,h)
-
+#    cp5.addCallback(controlEvent)
 
 def draw():
     global angulo, a, b, m, n1,n2,n3,radio,grosor,tamGuiX
 #    float ang,prim,seg,tot,xx,xxx,yy
 #cada vuelta se aumenta en grados
-#    print a,b,m,n1,n2,n3,radio,grosor
+
+
     ang = m * angulo /4 * TWO_PI/ 360
-  
     prim = pow(abs(cos(ang/a)),n2)
     seg = pow(abs(sin(ang/b)),n3)
-
-    tot = pow (prim+seg,-(1/n1)) * radio
+    tot = pow(prim+seg,-(1.0/n1)) * radio
+   
     xx = tot*cos(angulo*TWO_PI/360)
     yy = tot*sin(angulo*TWO_PI/360)
+    print tot, xx,yy
     
-#    print angulo, ang,prim,seg,tot,xx,yy
     strokeWeight(grosor)
     point(xx+ width*(1+tamGuiX)/2,yy+height/2)
   
