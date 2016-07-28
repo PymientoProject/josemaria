@@ -14,13 +14,19 @@ radio = 128
 grosor = 6
 # Proporcion de la pantalla dedicada a los controles
 tamGuiX= 0.150
-# cp5 = ControlP5(this)  
+#cp5 = ControlP5(this)  
 #sradio = Slider(cp5,"Radio")
 
 #Slider sradio,sm,sn1,sn2,sn3
+sn3 = None
+sn2 = None
+sn1 = None
+sm = None
 
 def setup():
-    print "Comienza"
+    global sn3,sn2,sn1, sm
+#    global cp5
+#    print "Comienza"
     fullScreen()
     h = int(height * .03)
     w = int(width * tamGuiX)
@@ -53,11 +59,12 @@ def setup():
     sn3 = Slider(cp5,"N3")
     sn3.setPosition(10,sep*7).setSize(w,h).setRange(0,25).setValue(6).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
 
-
+    '''
     cp5.addSlider("M",0,25,7,10,sep*4,w,h).setNumberOfTickMarks(251).snapToTickMarks(True).showTickMarks(False)
     cp5.addSlider("N1",0,10,10,10,sep*5,w,h).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     cp5.addSlider("N2",0,10,6,10,sep*6,w,h).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     cp5.addSlider("N3",0,10,6,10,sep*7,w,h).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    '''    
     cp5.addSlider("Grosor",0,50,6,10,sep*8,w,h).setNumberOfTickMarks(51).snapToTickMarks(True).showTickMarks(False)
 
     cp5.addButton("ejemplo 1",1).setPosition(10,sep*10).setSize(w,h)
@@ -66,7 +73,7 @@ def setup():
     cp5.addButton("ejemplo 4",1).setPosition(10,sep*13).setSize(w,h)
     cp5.addButton("ejemplo 5",1).setPosition(10,sep*14).setSize(w,h)
     cp5.addButton("ejemplo 6",1).setPosition(10,sep*15).setSize(w,h)
-#    cp5.addCallback(controlEvent)
+    cp5.addCallback(controlDelEvento)
 
 def draw():
     global angulo, a, b, m, n1,n2,n3,radio,grosor,tamGuiX
@@ -81,7 +88,7 @@ def draw():
    
     xx = tot*cos(angulo*TWO_PI/360)
     yy = tot*sin(angulo*TWO_PI/360)
-    print tot, xx,yy
+#    print tot, xx,yy
     
     strokeWeight(grosor)
     point(xx+ width*(1+tamGuiX)/2,yy+height/2)
@@ -89,49 +96,56 @@ def draw():
     angulo = angulo + incremento;
 
 
-def controlEvent(theEvent):
+def controlDelEvento(theEvent):
     global angulo, a, b, m, n1,n2,n3,radio,grosor,incremento,sradio
-    print "principio del evento"
-    if(theEvent.isController()):
-        print "entra en controler"
-        if(theEvent.getController().getName()=="Radio"):
+#    print "principio del evento"
+        
+    if(theEvent.getAction()==ControlP5.ACTION_RELEASE) :
+#        print "se ha pulsado un control"
+        ctrl = theEvent.getController()
+        if(ctrl.getName()=="Radio"):
             radio = theEvent.getController().getValue() 
             incremento = 128/radio
-            print radio
-        if(theEvent.getController().getName()=="A"):
+#            print radio
+        if(ctrl.getName()=="A"):
             a = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="B"):
+        if(ctrl.getName()=="B"):
             b = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="M"):
+        if(ctrl.getName()=="M"):
             m = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="N1"):
+        if(ctrl.getName()=="N1"):
             n1 = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="N2"):
+        if(ctrl.getName()=="N2"):
             n2 = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="N3"):
+        if(ctrl.getName()=="N3"):
             n3 = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="Grosor"):
+        if(ctrl.getName()=="Grosor"):
             grosor = theEvent.getController().getValue()
-        if(theEvent.getController().getName()=="ejemplo 1"):
+        if(ctrl.getName()=="ejemplo 1"):
             setValores(5,2,7,7)
-        if(theEvent.getController().getName()=="ejemplo 2"):
+        if(ctrl.getName()=="ejemplo 2"):
             setValores(6,1,7,8)
-        if(theEvent.getController().getName()=="ejemplo 3"):
+        if(ctrl.getName()=="ejemplo 3"):
             setValores(5,1,1,1)
-        if(theEvent.getController().getName()=="ejemplo 4"):
+        if(ctrl.getName()=="ejemplo 4"):
             setValores(7,2,8,4)
-        if(theEvent.getController().getName()=="ejemplo 5"):
+        if(ctrl.getName()=="ejemplo 5"):
             setValores(8,.5,.5,8)
-        if(theEvent.getController().getName()=="ejemplo 6"):
+        if(ctrl.getName()=="ejemplo 6"):
             setValores(16,.5,.5,16)
-    background(0)
-    angulo = 0
+        background(0)
+        angulo = 0
     
   
 
 
-def setValores(self,setm,setn1,setn2,setn3):
-    sm.setValue(setm)
+def setValores(setm,setn1,setn2,setn3):
+    global m, n1,n2,n3,sn3,sn2,sn1,sm
+    m = setm
+    n1= setn1
+    n2= setn2
+    n3= setn3
     sn1.setValue(setn1)
     sn2.setValue(setn2)
     sn3.setValue(setn3)
+    sm.setValue(setm)
