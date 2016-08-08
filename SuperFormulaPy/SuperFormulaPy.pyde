@@ -21,10 +21,13 @@ tamGuiX= 0.150
 sn3 = None
 sn2 = None
 sn1 = None
+btnagap = None
 sm = None
 
+agap=[]
+
 def setup():
-    global sn3,sn2,sn1, sm
+    global sn3,sn2,sn1, sm,btnagap
 #    global cp5
 #    print "Comienza"
     fullScreen()
@@ -73,10 +76,13 @@ def setup():
     cp5.addButton("ejemplo 4",1).setPosition(10,sep*13).setSize(w,h)
     cp5.addButton("ejemplo 5",1).setPosition(10,sep*14).setSize(w,h)
     cp5.addButton("ejemplo 6",1).setPosition(10,sep*15).setSize(w,h)
+ 
+    btnagap = Button(cp5,"AGAP")
+    btnagap.setPosition(10,sep*24).setSize(w,h).setVisible(False)
     cp5.addCallback(controlDelEvento)
 
 def draw():
-    global angulo, a, b, m, n1,n2,n3,radio,grosor,tamGuiX
+    global angulo, a, b, m, n1,n2,n3,radio,grosor,tamGuiX, agap,btnagap
 #    float ang,prim,seg,tot,xx,xxx,yy
 #cada vuelta se aumenta en grados
 
@@ -91,9 +97,15 @@ def draw():
 #    print tot, xx,yy
     
     strokeWeight(grosor)
-    point(xx+ width*(1+tamGuiX)/2,yy+height/2)
+    punx = xx+ width*(1+tamGuiX)/2
+    puny = yy+height/2
+    point(punx,puny)
+    if (angulo<360):
+        agap.append([angulo,punx,puny])
+    else:
+         btnagap.setVisible(True)
   
-    angulo = angulo + incremento;
+    angulo = angulo + incremento
 
 
 def controlDelEvento(theEvent):
@@ -133,10 +145,21 @@ def controlDelEvento(theEvent):
             setValores(8,.5,.5,8)
         if(ctrl.getName()=="ejemplo 6"):
             setValores(16,.5,.5,16)
+        if(ctrl.getName()=="AGAP"):
+            agapSal()
+            
         background(0)
         angulo = 0
     
   
+def agapSal():
+    #   print "entro en agapsal"
+    output = createWriter("agap.txt")
+    for item in agap:
+        output.print(item) # Write the datum to the file
+    output.flush()# Writes the remaining data to the file
+    output.close()# Finishes the file
+
 
 
 def setValores(setm,setn1,setn2,setn3):
