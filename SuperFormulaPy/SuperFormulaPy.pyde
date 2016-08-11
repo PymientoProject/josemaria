@@ -23,6 +23,8 @@ sn2 = None
 sn1 = None
 btnagap = None
 sm = None
+partvuelta = 0.0
+pinta = True
 
 agap=[]
 
@@ -35,17 +37,19 @@ def setup():
     w = int(width * tamGuiX)
     sep = int( height * .04)
     background(0)
-    stroke(255)
+    stroke(255,255,255)
     smooth()
     cp5 = ControlP5(this)  
     global sradio
-    p = createFont("Verdana",9)
+    p = createFont("Verdana",12)
 
     cp5.setColorForeground(0xffaa0000)
     cp5.setColorBackground(0xff660000)
-    cp5.setColorValueLabel(0xffff88ff)
+    cp5.setColorValueLabel(0xffffffff)
     cp5.setColorActive(0xffff0000)
-  
+    cp5.setColorCaptionLabel(0xffffffff)
+    cp5.setFont(p)
+      
     sradio = Slider(cp5,"Radio")
     sradio.setPosition(10.0,sep*1).setSize(w,h).setRange(0,255).setValue(128)
   
@@ -62,12 +66,6 @@ def setup():
     sn3 = Slider(cp5,"N3")
     sn3.setPosition(10,sep*7).setSize(w,h).setRange(0,25).setValue(6).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
 
-    '''
-    cp5.addSlider("M",0,25,7,10,sep*4,w,h).setNumberOfTickMarks(251).snapToTickMarks(True).showTickMarks(False)
-    cp5.addSlider("N1",0,10,10,10,sep*5,w,h).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
-    cp5.addSlider("N2",0,10,6,10,sep*6,w,h).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
-    cp5.addSlider("N3",0,10,6,10,sep*7,w,h).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
-    '''    
     cp5.addSlider("Grosor",0,50,6,10,sep*8,w,h).setNumberOfTickMarks(51).snapToTickMarks(True).showTickMarks(False)
 
     cp5.addButton("ejemplo 1",1).setPosition(10,sep*10).setSize(w,h)
@@ -80,40 +78,56 @@ def setup():
     btnagap = Button(cp5,"AGAP")
     btnagap.setPosition(10,sep*24).setSize(w,h).setVisible(False)
     cp5.addCallback(controlDelEvento)
+    stroke(100,255,255)
 
 def draw():
-    global angulo, a, b, m, n1,n2,n3,radio,grosor,tamGuiX, agap,btnagap
+    global angulo, a, b, m, n1,n2,n3,radio,grosor,tamGuiX, agap,btnagap,pinta,partvuelta
+
 #    float ang,prim,seg,tot,xx,xxx,yy
 #cada vuelta se aumenta en grados
 
-
-    ang = m * angulo /4 * TWO_PI/ 360
-    prim = pow(abs(cos(ang/a)),n2)
-    seg = pow(abs(sin(ang/b)),n3)
-    tot = pow(prim+seg,-(1.0/n1)) * radio
+    if (pinta):
+        ang = m * angulo /4 * TWO_PI/ 360
+        prim = pow(abs(cos(ang/a)),n2)
+        seg = pow(abs(sin(ang/b)),n3)
+        tot = pow(prim+seg,-(1.0/n1)) * radio
    
-    xx = tot*cos(angulo*TWO_PI/360)
-    yy = tot*sin(angulo*TWO_PI/360)
-#    print tot, xx,yy
+        xx = tot*cos(angulo*TWO_PI/360)
+        yy = tot*sin(angulo*TWO_PI/360)
+    #    print tot, xx,yy
     
-    strokeWeight(grosor)
-    punx = xx+ width*(1+tamGuiX)/2
-    puny = yy+height/2
-    point(punx,puny)
-    if (angulo<360):
-        agap.append([angulo,punx,puny])
-    else:
-         btnagap.setVisible(True)
-  
-    angulo = angulo + incremento
+        strokeWeight(grosor)
+        punx = xx+ width*(1+tamGuiX)/2
+        puny = yy+height/2
+        clr = 255 - angulo/10
+        stroke (255,255,255)
+#        stroke(clr,clr/1.5,clr/1.2)
+        point(punx,puny)
+        if (angulo<360):
+            agap.append([angulo,punx,puny])
+        else:
+            btnagap.setVisible(True)
+        '''            
+        if (angulo>1 and angulo%360.0 == 0.0):
+            partvuelta = partvuelta + (m % int(m))
+            print "resta", partvuelta- int(partvuelta)
+            if (partvuelta-int(partvuelta) > 1.0 and partvuelta-int(partvuelta)<0.01):
+                pinta=False
+                print "pinta false"
+#    noLoop()
+        '''
+        
+   
+        angulo = angulo + incremento
 
 
 def controlDelEvento(theEvent):
-    global angulo, a, b, m, n1,n2,n3,radio,grosor,incremento,sradio
+    global angulo, a, b, m, n1,n2,n3,radio,grosor,incremento,sradio,pinta
 #    print "principio del evento"
         
     if(theEvent.getAction()==ControlP5.ACTION_RELEASE) :
 #        print "se ha pulsado un control"
+        pinta = True
         ctrl = theEvent.getController()
         if(ctrl.getName()=="Radio"):
             radio = theEvent.getController().getValue() 
@@ -125,6 +139,7 @@ def controlDelEvento(theEvent):
             b = theEvent.getController().getValue()
         if(ctrl.getName()=="M"):
             m = theEvent.getController().getValue()
+            m= float(int(m * 10))/10
         if(ctrl.getName()=="N1"):
             n1 = theEvent.getController().getValue()
         if(ctrl.getName()=="N2"):
@@ -147,9 +162,10 @@ def controlDelEvento(theEvent):
             setValores(16,.5,.5,16)
         if(ctrl.getName()=="AGAP"):
             agapSal()
-            
+    
         background(0)
         angulo = 0
+        btnagap.setVisible(False)
     
   
 def agapSal():
