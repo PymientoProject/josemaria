@@ -1,44 +1,198 @@
 add_library('controlP5')
 
 matriz = []
-gris = color(100,100,100)
+#variables de los controles
+r = 128
+g = 128
+b = 128
 porcen = 60
+c = 8
+archivo1 = ""
+archivo2 = ""
+arch1 = None
+arch2 = None
 
+#variables del entorno
+#tamaño y posicion del rectangulo
+
+rectw = 0
+recth = 0
+rectx = 0
+recty = 0
+
+repintar = False
+rellenarmatriz = True
+
+tamGuiX= 0.150
 
 
 def setup():
+    global rectw,recth,btnr,arch1,arch2
 
-    size(800,600)
     fullScreen()
-    background(255)
+    background(0)
     strokeCap(PROJECT)
     noStroke()
-    rellenaMatriz()
-    cargaDibu()
+    
+    # Definicion GUI
+    
+    # reparto horizontal
+    px =(1-tamGuiX)*width
+    
+    # tamaño rectangulo
+    rectw = px -20
+    recth = height -20
+   
+    puntoscol = 0
+    
+    # tamaño botones
+    bw = int(tamGuiX*width) - 20    #el 20 para que quepa la letra
+    bh = int(height * .03)
+    # separacion de los botones
+    sep = int( height * .04)
+
+    
+    fill(255)
+    rectangulo(rectw,recth)
+    
+    cp5 =ControlP5(this)
+    p = createFont("Verdana",11)
+    cp5.setFont(p)
+    
+    cp5.setColorForeground(color(0,170,255)) #Azul claro
+    cp5.setColorBackground(color(0,100,255)) #Azul
+    cp5.setColorValueLabel(color(255,255,160)) # claro ¿amarillo? ver
+    cp5.setColorActive(color(255,255,0))     #amarillo
+    #cp5.setColorValue(color(255,255,255))
+    
+    checkbox = cp5.addCheckBox("checkBox").setPosition(px, sep).setSize(bh,bh).addItem("Aleatorio", 0)
+
+     #cp5.addToggle("toggle")
+     #.setPosition(px,sep)
+     #.setSize(bh,bh)
+     #.setValue(True)
+     #.setMode(ControlP5.SWITCH)
+     #.setMode(ControlP5.HORIZONTAL)
+    
+    sr = Slider(cp5,"R")
+    sr.setPosition(px,sep*2).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sg = Slider(cp5,"G")
+    sg.setPosition(px,sep*3).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sb = Slider(cp5,"B")
+    sb.setPosition(px,sep*4).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sp = Slider(cp5,"%")
+    sp.setPosition(px,sep*5).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sc = Slider(cp5,"C")
+    sc.setPosition(px,sep*6).setSize(bw,bh).setRange(2,12).setValue(8).setNumberOfTickMarks(11).snapToTickMarks(True).showTickMarks(False)
+
+    # cp5.addTextlabel("Archivo ").setPosition(px, sep*7).setSize(bw,bh).setText("ARCHIVO:")
+    arch1 = Textfield(cp5,"Archivo").setPosition(px,sep*16).setSize(bw,bh)
+    
+    arch2 = Textfield(cp5,"Archivo3d").setPosition(px,sep*18).setSize(bw,bh)
+    btnr = Button(cp5,"Dibujar").setPosition(px,sep*22).setSize(bw,bh).setColorBackground(color(255,0,0)).setColorForeground(color(255,100,100))
+    btns = Button(cp5,"Guardar").setPosition(px,sep*24).setSize(bw,bh).setColorBackground(color(255,0,0)).setColorForeground(color(255,100,100))
+
+    cp5.addCallback(controlDelEvento)
+# Parte del programa     
+
+
  
 
 def draw():
-    noLoop()
-    pintaMatriz()
-'''    
+    global repintar,rellenarmatriz
+
+    if (rellenarmatriz):  
+        if (archivo1=""):
+            rellenaMatriz()
+        else :
+            rellenadib()
+        
+        rellenarmatriz = False
+    if (repintar):
+        print "entro en repintar"
+        cargaDibu()
+        pintaMatriz()
+        repintar = False
+        
+#    noLoop()
+    
+    '''
+  pintaMatriz()    
 //  imprime();
 //  getsPuntos();
 //  lineasRef();
 //  salvaDibu();
-'''
+    '''
+    
+def controlDelEvento(theEvent):
+    global r,g,b,c,repintar,archivo2,archivo1
+    
+#    print "principio del evento"
+        
+    if(theEvent.getAction()==ControlP5.ACTION_RELEASE) :
+#        print "se ha pulsado un control"
+        ctrl = theEvent.getController()
+        print "en el evento-",ctrl.getName()
+        if(ctrl.getName()=="Dibujar"):
+            archivo2=arch2.getText()
+            repintar = True
+        if(ctrl.getName()=="Guardar"):
+            salvaDibu()
+        if(ctrl.getName()=="B"):
+            b = theEvent.getController().getValue()
+        if(ctrl.getName()=="M"):
+            m = theEvent.getController().getValue()
+            m= float(int(m * 10))/10
+        if(ctrl.getName()=="N1"):
+            n1 = theEvent.getController().getValue()
+        if(ctrl.getName()=="N2"):
+            n2 = theEvent.getController().getValue()
+        if(ctrl.getName()=="N3"):
+            n3 = theEvent.getController().getValue()
+        if(ctrl.getName()=="Grosor"):
+            grosor = theEvent.getController().getValue()
+        if(ctrl.getName()=="ejemplo 1"):
+            setValores(5,2,7,7)
+        if(ctrl.getName()=="ejemplo 2"):
+            setValores(6,1,7,8)
+        if(ctrl.getName()=="ejemplo 3"):
+            setValores(5,1,1,1)
+        if(ctrl.getName()=="ejemplo 4"):
+            setValores(7,2,8,4)
+        if(ctrl.getName()=="ejemplo 5"):
+            setValores(8,.5,.5,8)
+        if(ctrl.getName()=="ejemplo 6"):
+            setValores(16,.5,.5,16)
+        '''
+        if(ctrl.getName()=="AGAP"):
+            agapSal()
+        btnagap.setVisible(False)
+        '''    
+  
+
 
 # Funciones propias
+def     rectangulo(w,h):
+    global rectx, recty
+#    fill(100)
+    rectx = ((1-tamGuiX)*width - w)/2
+    recty = (height - h)/2
+    rect(rectx,recty,w,h)
 
 def rellenaMatriz() :
-    global matriz
+    global matriz,puntoscol
 #    print "Entro en rellena"
     a=0
     b=0
+    puntoscol = int(rectw/c) +1
+    aa = puntoscol/2
+    bb = recth/2
 
-    while (a<40):
+    
+    while (a<=aa):
         m=[]
         b=0
-        while (b<300):
+        while (b<=bb):
             if (random(100)<porcen):
                 m.append(color(random(20,250),random(20,250),random(190)))
             else:
@@ -47,43 +201,48 @@ def rellenaMatriz() :
         matriz.append(m)
         a = a+1
     # print matriz
+def rellenadib():
+    
 
 def pintaMatriz():
+    global puntoscol
     columnas=0
-    while (columnas<10):
+    while (columnas<c):
         y =0
-        while (y<600):
+        while (y<recth):
             x=0
-            while (x<80):
-                ge = get(80*columnas+x,y)              
+            while (x<puntoscol):
+                gx=int (puntoscol*columnas+x+rectx)
+                ge = get(gx,y+recty)              
                 b = 10 - int(brightness(ge)/25.5)
                 giraMatriz(x/2,y/2,b)
                 fill(matriz[x/2][y/2])
-                xx =(80*columnas+x)
-                # yy = y * 2 ;
-                rect(xx,y,2,2)
+                xx =(puntoscol*columnas+x) + rectx
+                yy = y + recty
+                rect(xx,yy,2,2)
                 x=x+2
             y = y+2
         columnas = columnas +1
 
 def cargaDibu():
-    
-  img = loadImage("pymiento.jpg")
+  print archivo2  
+  img = loadImage(archivo2)
+  lx = (rectw - img.width)/2
+  ly = (recth - img.height)/2
 
-  image(img, 0, 0)
+  image(img, lx, ly)
 
-'''
-void salvaDibu(){
-    save ("pymiento3D.jpg");
-}
-'''
+def salvaDibu():
+    save ("3d"+archivo2)
+
+
 def giraMatriz(x, y, b):
     global matriz
     xx = x;
     a=0;
     #  for (xx = x; xx <80;xx++){
-    if (xx>(39-b)):
-      a = xx- 40
+    if (xx>(puntoscol/2-1-b)):
+      a = xx- puntoscol/2
     else:
       a = xx
     matriz[x][y] = matriz[a+b][y]
