@@ -12,6 +12,15 @@ archivo2 = ""
 arch1 = None
 arch2 = None
 
+'''
+# nombre de los controles
+sr = None
+sg = None
+sb = None
+sp = None
+'''
+lb =None
+
 #variables del entorno
 #tamaño y posicion del rectangulo
 
@@ -21,13 +30,14 @@ rectx = 0
 recty = 0
 
 repintar = False
-rellenarmatriz = True
+rellenarmatriz = False
 
 tamGuiX= 0.150
 
 
 def setup():
-    global rectw,recth,btnr,arch1,arch2
+    global rectw,recth,btnr,arch1,arch2,lb
+    # global sr,sg,sb,sp,
 
     fullScreen()
     background(0)
@@ -75,16 +85,17 @@ def setup():
      #.setMode(ControlP5.HORIZONTAL)
     
     sr = Slider(cp5,"R")
-    sr.setPosition(px,sep*2).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sr.setPosition(px,sep*2).setSize(bw,bh).setRange(0,25).setValue(12).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     sg = Slider(cp5,"G")
-    sg.setPosition(px,sep*3).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sg.setPosition(px,sep*3).setSize(bw,bh).setRange(0,25).setValue(12).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     sb = Slider(cp5,"B")
-    sb.setPosition(px,sep*4).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sb.setPosition(px,sep*4).setSize(bw,bh).setRange(0,25).setValue(12).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     sp = Slider(cp5,"%")
-    sp.setPosition(px,sep*5).setSize(bw,bh).setRange(0,25).setValue(10).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
+    sp.setPosition(px,sep*5).setSize(bw,bh).setRange(0,100).setValue(60).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     sc = Slider(cp5,"C")
     sc.setPosition(px,sep*6).setSize(bw,bh).setRange(2,12).setValue(8).setNumberOfTickMarks(11).snapToTickMarks(True).showTickMarks(False)
-
+    lb = Textfield(cp5,"")
+    lb.setPosition(px,sep*9).setSize(bw,bh).setColorBackground(color(255,0,0)).setColorForeground(color(255,0,0))
     # cp5.addTextlabel("Archivo ").setPosition(px, sep*7).setSize(bw,bh).setText("ARCHIVO:")
     arch1 = Textfield(cp5,"Archivo").setPosition(px,sep*16).setSize(bw,bh)
     
@@ -99,10 +110,11 @@ def setup():
  
 
 def draw():
+    '''
     global repintar,rellenarmatriz
 
     if (rellenarmatriz):  
-        if (archivo1=""):
+        if (archivo1==""):
             rellenaMatriz()
         else :
             rellenadib()
@@ -116,7 +128,7 @@ def draw():
         
 #    noLoop()
     
-    '''
+    
   pintaMatriz()    
 //  imprime();
 //  getsPuntos();
@@ -125,7 +137,7 @@ def draw():
     '''
     
 def controlDelEvento(theEvent):
-    global r,g,b,c,repintar,archivo2,archivo1
+    global r,g,b,porcen,c,archivo2,archivo1
     
 #    print "principio del evento"
         
@@ -135,18 +147,21 @@ def controlDelEvento(theEvent):
         print "en el evento-",ctrl.getName()
         if(ctrl.getName()=="Dibujar"):
             archivo2=arch2.getText()
-            repintar = True
+            lb.setVisible(True)
+            redraw()
+            dibuja()
         if(ctrl.getName()=="Guardar"):
             salvaDibu()
+        if(ctrl.getName()=="R"):
+            r = (theEvent.getController().getValue())*10
+        if(ctrl.getName()=="G"):
+            g = (theEvent.getController().getValue())*10
         if(ctrl.getName()=="B"):
-            b = theEvent.getController().getValue()
-        if(ctrl.getName()=="M"):
-            m = theEvent.getController().getValue()
-            m= float(int(m * 10))/10
-        if(ctrl.getName()=="N1"):
-            n1 = theEvent.getController().getValue()
-        if(ctrl.getName()=="N2"):
-            n2 = theEvent.getController().getValue()
+            b = (theEvent.getController().getValue())*10
+        if(ctrl.getName()=="%"):
+            porcen =theEvent.getController().getValue()
+            
+           
         if(ctrl.getName()=="N3"):
             n3 = theEvent.getController().getValue()
         if(ctrl.getName()=="Grosor"):
@@ -174,35 +189,50 @@ def controlDelEvento(theEvent):
 # Funciones propias
 def     rectangulo(w,h):
     global rectx, recty
-#    fill(100)
+    fill(255)
     rectx = ((1-tamGuiX)*width - w)/2
     recty = (height - h)/2
     rect(rectx,recty,w,h)
 
+def dibuja():
+    global lb
+    
+    lb.setText("Trabajando")
+    redraw()
+    print "dentro de dibuja"
+    rectangulo(rectw,recth)
+    rellenaMatriz()
+    cargaDibu()
+    pintaMatriz()
+    
+    #lb.setVisible(False)
+
 def rellenaMatriz() :
-    global matriz,puntoscol
+    global matriz,puntoscol,porcen,r,g,b
 #    print "Entro en rellena"
-    a=0
-    b=0
+    j=0
+    k=0
+    matriz = []
     puntoscol = int(rectw/c) +1
     aa = puntoscol/2
     bb = recth/2
 
     
-    while (a<=aa):
+    while (j<=aa):
         m=[]
-        b=0
-        while (b<=bb):
+        k=0
+        while (k<=bb):
             if (random(100)<porcen):
-                m.append(color(random(20,250),random(20,250),random(190)))
+                m.append(color(random(40,r),random(40,g),random(40,b)))
             else:
                 m.append(color(255,255,255))
-            b=b+1
+            k=k+1
         matriz.append(m)
-        a = a+1
+        j = j+1
     # print matriz
+
 def rellenadib():
-    
+    pass
 
 def pintaMatriz():
     global puntoscol
@@ -225,8 +255,13 @@ def pintaMatriz():
         columnas = columnas +1
 
 def cargaDibu():
+  global archivo2
   print archivo2  
+  if (archivo2==""):
+      archivo2="pymiento.jpg"
+      
   img = loadImage(archivo2)
+  
   lx = (rectw - img.width)/2
   ly = (recth - img.height)/2
 
