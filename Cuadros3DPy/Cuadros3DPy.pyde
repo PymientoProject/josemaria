@@ -7,18 +7,15 @@ g = 128
 b = 128
 porcen = 60
 c = 8
+puntoscol = 0
 archivo1 = ""
 archivo2 = ""
 arch1 = None
 arch2 = None
 
-'''
+
 # nombre de los controles
-sr = None
-sg = None
-sb = None
-sp = None
-'''
+
 lb =None
 
 #variables del entorno
@@ -29,8 +26,8 @@ recth = 0
 rectx = 0
 recty = 0
 
-repintar = False
-rellenarmatriz = False
+estado = 10
+
 
 tamGuiX= 0.150
 
@@ -94,8 +91,8 @@ def setup():
     sp.setPosition(px,sep*5).setSize(bw,bh).setRange(0,100).setValue(60).setNumberOfTickMarks(101).snapToTickMarks(True).showTickMarks(False)
     sc = Slider(cp5,"C")
     sc.setPosition(px,sep*6).setSize(bw,bh).setRange(2,12).setValue(8).setNumberOfTickMarks(11).snapToTickMarks(True).showTickMarks(False)
-    lb = Textfield(cp5,"")
-    lb.setPosition(px,sep*9).setSize(bw,bh).setColorBackground(color(255,0,0)).setColorForeground(color(255,0,0))
+    lb = Button(cp5,"Trabajando")
+    lb.setPosition(px,sep*9).setSize(bw,bh).setColorBackground(color(255,0,0)).setColorForeground(color(255,0,0)).setVisible(False)
     # cp5.addTextlabel("Archivo ").setPosition(px, sep*7).setSize(bw,bh).setText("ARCHIVO:")
     arch1 = Textfield(cp5,"Archivo").setPosition(px,sep*16).setSize(bw,bh)
     
@@ -110,26 +107,41 @@ def setup():
  
 
 def draw():
-    '''
-    global repintar,rellenarmatriz
+    
+    global lb,estado
+    
+    lb.setVisible(False)
+    
+    if (estado==0):
+        lb.setVisible(False)
+        redraw()
+        estado = 12
+    if (estado==2):
+        pintaMatriz()
+        estado = 0
+        lb.setVisible(False)
+    
+    if (estado==4):
+        rectangulo(rectw,recth) 
+        cargaDibu()
 
-    if (rellenarmatriz):  
+        estado = 2
+    if (estado==6):
+        lb.setVisible(True)
+        estado = 4
+    if (estado==8):
         if (archivo1==""):
             rellenaMatriz()
         else :
-            rellenadib()
-        
-        rellenarmatriz = False
-    if (repintar):
-        print "entro en repintar"
-        cargaDibu()
-        pintaMatriz()
-        repintar = False
-        
-#    noLoop()
+            cargaDib()
+        estado = 6
+ 
+    if (estado==10):
+        rectangulo(rectw,recth) 
     
-    
-  pintaMatriz()    
+    '''    
+#    noLoop()    
+//  pintaMatriz()    
 //  imprime();
 //  getsPuntos();
 //  lineasRef();
@@ -137,19 +149,18 @@ def draw():
     '''
     
 def controlDelEvento(theEvent):
-    global r,g,b,porcen,c,archivo2,archivo1
+    global r,g,b,porcen,c,archivo2,archivo1,estado
     
 #    print "principio del evento"
         
     if(theEvent.getAction()==ControlP5.ACTION_RELEASE) :
 #        print "se ha pulsado un control"
         ctrl = theEvent.getController()
-        print "en el evento-",ctrl.getName()
+        #print "en el evento-",ctrl.getName()
         if(ctrl.getName()=="Dibujar"):
             archivo2=arch2.getText()
-            lb.setVisible(True)
-            redraw()
-            dibuja()
+            archivo1=arch1.getText()
+            estado = 8
         if(ctrl.getName()=="Guardar"):
             salvaDibu()
         if(ctrl.getName()=="R"):
@@ -160,10 +171,10 @@ def controlDelEvento(theEvent):
             b = (theEvent.getController().getValue())*10
         if(ctrl.getName()=="%"):
             porcen =theEvent.getController().getValue()
+        if(ctrl.getName()=="C"):
+            c = theEvent.getController().getValue()
             
-           
-        if(ctrl.getName()=="N3"):
-            n3 = theEvent.getController().getValue()
+            
         if(ctrl.getName()=="Grosor"):
             grosor = theEvent.getController().getValue()
         if(ctrl.getName()=="ejemplo 1"):
@@ -194,18 +205,6 @@ def     rectangulo(w,h):
     recty = (height - h)/2
     rect(rectx,recty,w,h)
 
-def dibuja():
-    global lb
-    
-    lb.setText("Trabajando")
-    redraw()
-    print "dentro de dibuja"
-    rectangulo(rectw,recth)
-    rellenaMatriz()
-    cargaDibu()
-    pintaMatriz()
-    
-    #lb.setVisible(False)
 
 def rellenaMatriz() :
     global matriz,puntoscol,porcen,r,g,b
@@ -229,10 +228,53 @@ def rellenaMatriz() :
             k=k+1
         matriz.append(m)
         j = j+1
-    # print matriz
+    #print "matriz", len(matriz[1])
 
-def rellenadib():
-    pass
+def cargaDib():
+  global archivo1,puntoscol
+  #print "entro en cargadib",archivo1  
+  '''
+  if (archivo1==""):
+  '''
+  archivo1="pymientop.jpg"    
+  img = loadImage(archivo1)
+  if img == None :
+      print "errorcargando archivo pequeño"
+    #lx = (rectw - img.width)/2
+    #ly = (recth - img.height)/2
+  else :
+    rectangulo(rectw,recth) 
+    image(img, rectx, recty)
+    x= img.width
+    y= img.height
+    puntoscol = int(rectw/c) +1
+    #print "entro en rellenadib"
+    factorx = (puntoscol/2.0)/x
+    if (puntoscol/2<x):
+        x=int(puntoscol/2)+1
+        #print "puntoscol X",x
+        #print "factorx", factorx
+    
+    
+    j=0    
+    while (j<=x):
+        m=[]
+        k=0
+        while (k<=recth/2):
+            
+            aa=int((j/factorx)+rectx)
+            bb= k%y +recty
+            
+            g = get(aa,bb)
+            #print "aa,bb",aa,bb
+            
+            m.append(g)
+            #print "j,k",j,k
+            k = k+1
+            
+            
+        matriz.append(m)
+        j = j+1
 
 def pintaMatriz():
     global puntoscol
@@ -254,18 +296,19 @@ def pintaMatriz():
             y = y+2
         columnas = columnas +1
 
+
 def cargaDibu():
   global archivo2
-  print archivo2  
   if (archivo2==""):
       archivo2="pymiento.jpg"
       
   img = loadImage(archivo2)
-  
-  lx = (rectw - img.width)/2
-  ly = (recth - img.height)/2
-
-  image(img, lx, ly)
+  if (img == None):
+      print "Error al cargar el archivo 3D"
+  else:
+      lx = (rectw - img.width)/2
+      ly = (recth - img.height)/2
+      image(img, lx, ly)
 
 def salvaDibu():
     save ("3d"+archivo2)
